@@ -1,0 +1,8 @@
+-- ADD YOUR MIGRATION IMPLEMENTATION
+
+ALTER TABLE listing
+    ADD (listing_type VARCHAR(50) NOT NULL,
+        condo_fees DECIMAL(12, 2)  NULL DEFAULT NULL,
+        lot_sqft INT(11) NULL DEFAULT NULL,
+        building_id VARCHAR(255) NULL DEFAULT NULL,
+        CONSTRAINT FK_Listing_Building FOREIGN KEY (building_id) REFERENCES building (id) ON DELETE NO ACTION ON UPDATE NO ACTION);
