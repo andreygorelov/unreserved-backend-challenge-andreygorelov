@@ -22,10 +22,14 @@ public class CustomersTest extends AbstractTest {
 
     @Test
     public void addCustomersSuccess() throws Exception {
+        MvcResult mvcResult = customersGetRequest(status().isOk());
+        Map<String, List<CustomerDto>> customers = getCustomerListFromResponse(mvcResult);
+        int initialCustomerSize = customers.get("customers").size();
+
         // Customer without listings
         CustomerDto customerDto = CustomerDto.builder().email("testuser4@domain.net").build();
         // Verify
-        MvcResult mvcResult = customerPostRequest(customerDto, status().isCreated());
+        mvcResult = customerPostRequest(customerDto, status().isCreated());
         CustomerDto responseDto = getCustomerDTOFromResponse(mvcResult);
         assertEquals("testuser4@domain.net", responseDto.getEmail());
 
@@ -44,17 +48,15 @@ public class CustomersTest extends AbstractTest {
 
         // There should be 7 customers with 3, 2, and 1 listings
         mvcResult = customersGetRequest(status().isOk());
-        Map<String, List<CustomerDto>> customers = getCustomerListFromResponse(mvcResult);
-        assertEquals(7, customers.get("customers").size());
+        customers = getCustomerListFromResponse(mvcResult);
+        assertEquals(initialCustomerSize + 2, customers.get("customers").size());
 
         customers.get("customers").forEach(customer -> {
             if ("testuser5@domain.net".equals(customer.getEmail())) {
                 assertEquals(customer.getListingsInterested().size(), 3);
-            }
-            else if ("testuser1@domain.net".equals(customer.getEmail())) {
+            } else if ("testuser1@domain.net".equals(customer.getEmail())) {
                 assertEquals(customer.getListingsInterested().size(), 2);
-            }
-            else if ("testuser2@domain.net".equals(customer.getEmail())) {
+            } else if ("testuser2@domain.net".equals(customer.getEmail())) {
                 assertEquals(customer.getListingsInterested().size(), 1);
             }
         });

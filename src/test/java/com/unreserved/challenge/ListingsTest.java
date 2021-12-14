@@ -22,6 +22,24 @@ public class ListingsTest extends AbstractTest {
 
     @Test
     public void addListingsSuccess() throws Exception {
+        // Get existing listings if there were prepopulated
+        MvcResult mvcResult = listingsGetRequest(null, status().isOk());
+        Map<String, List<ListingDto>> listingMap = getListingListFromResponse(mvcResult);
+        int initialLytistingSizeAll = listingMap.get("listings").size();
+
+        // Get listing condo size
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("type", "condo");
+        mvcResult = listingsGetRequest(params, status().isOk());
+        listingMap = getListingListFromResponse(mvcResult);
+        int initialListingSizeCondos = listingMap.get("listings").size();
+
+        params.add("type", "hoouse");
+        mvcResult = listingsGetRequest(params, status().isOk());
+        listingMap = getListingListFromResponse(mvcResult);
+        int initialListingSizeHouses = listingMap.get("listings").size();
+
+
         // Add 3 extra listing entries
         ListingDto listingDto = ListingDto.builder()
                 .status(ListingStatus.DRAFT)
@@ -36,7 +54,7 @@ public class ListingsTest extends AbstractTest {
                 .address1("100 Williby ave")
                 .type(ListingType.CONDO).build();
         // Verify
-        MvcResult mvcResult = listingPostRequest(listingDto, status().isCreated());
+        mvcResult = listingPostRequest(listingDto, status().isCreated());
         ListingDto responseDto = getListingDTOFromResponse(mvcResult);
         assertEquals(ListingType.CONDO, responseDto.getType());
         assertEquals("375e16e5-d5c2-11eb-ad41-0abe8932f98d", responseDto.getBuildingId());
@@ -81,35 +99,28 @@ public class ListingsTest extends AbstractTest {
         assertEquals(Integer.valueOf(200), responseDto.getLotSqft());
 
         // Check pagination
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params = new LinkedMultiValueMap<>();
         params.add("pageNumber", "0");
         params.add("pageSize", "10");
 
         mvcResult = listingsGetRequest(params, status().isOk());
-        Map<String, List<ListingDto>> listingMap = getListingListFromResponse(mvcResult);
-        // 5 from sql script and 3 here
-        assertEquals(8, listingMap.get("listings").size());
+        listingMap = getListingListFromResponse(mvcResult);
+        // initialSize from sql script and 3 here
+        assertEquals(initialLytistingSizeAll + 3, listingMap.get("listings").size());
 
         // Filter by condo type
         params.add("type", "condo");
         mvcResult = listingsGetRequest(params, status().isOk());
         listingMap = getListingListFromResponse(mvcResult);
-        // There should be 5 condos 3 from sql and 2 here
-        assertEquals(5, listingMap.get("listings").size());
+        // Initial listing size condos 3 from sql and 2 here
+        assertEquals(initialListingSizeCondos + 2, listingMap.get("listings").size());
 
         // Filter by house type
         params.replace("type", List.of("HOUSE"));
         mvcResult = listingsGetRequest(params, status().isOk());
         listingMap = getListingListFromResponse(mvcResult);
-        // There should be 3 houses 2 from sql and 1 here
-        assertEquals(3, listingMap.get("listings").size());
-
-        // Filter by house type
-        params.replace("type", List.of("HOUSE"));
-        mvcResult = listingsGetRequest(params, status().isOk());
-        listingMap = getListingListFromResponse(mvcResult);
-        // There should be 3 houses 2 from sql and 1 here
-        assertEquals(3, listingMap.get("listings").size());
+        // Initial listing size houses from sql and 1 here
+        assertEquals(initialListingSizeHouses + 1, listingMap.get("listings").size());
     }
 
     @Test
@@ -163,6 +174,5 @@ public class ListingsTest extends AbstractTest {
         // Verify
         mvcResult = listingPostRequest(listingDto, status().isBadRequest());
         assertMessageResponse("Lot square footage is required!", mvcResult);
-
     }
 }
