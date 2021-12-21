@@ -26,7 +26,7 @@ public class CustomerService {
         return customerEntityMapper.map(customerRepository.save(customerEntityMapper.map(customerBo)));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<CustomerBo> getCustomers(Sort sort) {
         List<Customer> customers = customerRepository.findAll(sort);
         return customers.stream().map(customerEntityMapper::map).collect(Collectors.toList());

@@ -4,6 +4,7 @@ import com.unreserved.challenge.domain.ListingType;
 import com.unreserved.challenge.repository.specification.SearchField;
 import com.unreserved.challenge.repository.specification.SearchPath;
 import com.unreserved.challenge.rest.dto.ListingDto;
+import com.unreserved.challenge.rest.dto.ListingEnvelopDto;
 import com.unreserved.challenge.rest.mapper.ListingDtoMapper;
 import com.unreserved.challenge.service.ListingService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -48,13 +47,10 @@ public class ListingController extends BaseController{
     }
 
     @GetMapping("")
-    public ResponseEntity<Map<String, List<ListingDto>>> getListings(@Valid ListingSearchCriteria listingSearchCriteria) {
-
+    public ResponseEntity<ListingEnvelopDto> getListings(@Valid ListingSearchCriteria listingSearchCriteria) {
         List<SearchField> fields = buildSearchFields(listingSearchCriteria);
         Pageable pageable = PageRequest.of(listingSearchCriteria.getPageNumber(), listingSearchCriteria.getPageSize());
-        List<ListingDto> listingDtos =
-                (listingService.getListings(fields, pageable).stream().map(listingDtoMapper::map).collect(Collectors.toList()));
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("listings", listingDtos));
+        return ResponseEntity.status(HttpStatus.OK).body(listingService.getListings(fields, pageable));
     }
 
     private List<SearchField> buildSearchFields(ListingSearchCriteria listingSearchCriteria) {

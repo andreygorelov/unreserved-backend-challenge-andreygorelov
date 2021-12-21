@@ -3,6 +3,7 @@ package com.unreserved.challenge;
 import com.unreserved.challenge.domain.ListingStatus;
 import com.unreserved.challenge.domain.ListingType;
 import com.unreserved.challenge.rest.dto.ListingDto;
+import com.unreserved.challenge.rest.dto.ListingEnvelopDto;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
@@ -24,20 +25,20 @@ public class ListingsTest extends AbstractTest {
     public void addListingsSuccess() throws Exception {
         // Get existing listings if there were prepopulated
         MvcResult mvcResult = listingsGetRequest(null, status().isOk());
-        Map<String, List<ListingDto>> listingMap = getListingListFromResponse(mvcResult);
-        int initialLytistingSizeAll = listingMap.get("listings").size();
+        ListingEnvelopDto listings = getListingListFromResponse(mvcResult);
+        int initialListingSizeAll = listings.getListing().size();
 
         // Get listing condo size
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("type", "condo");
         mvcResult = listingsGetRequest(params, status().isOk());
-        listingMap = getListingListFromResponse(mvcResult);
-        int initialListingSizeCondos = listingMap.get("listings").size();
+        listings = getListingListFromResponse(mvcResult);
+        int initialListingSizeCondos =listings.getListing().size();
 
-        params.add("type", "hoouse");
+        params.replace("type", List.of("house"));
         mvcResult = listingsGetRequest(params, status().isOk());
-        listingMap = getListingListFromResponse(mvcResult);
-        int initialListingSizeHouses = listingMap.get("listings").size();
+        listings = getListingListFromResponse(mvcResult);
+        int initialListingSizeHouses = listings.getListing().size();
 
 
         // Add 3 extra listing entries
@@ -104,23 +105,23 @@ public class ListingsTest extends AbstractTest {
         params.add("pageSize", "10");
 
         mvcResult = listingsGetRequest(params, status().isOk());
-        listingMap = getListingListFromResponse(mvcResult);
+        listings = getListingListFromResponse(mvcResult);
         // initialSize from sql script and 3 here
-        assertEquals(initialLytistingSizeAll + 3, listingMap.get("listings").size());
+        assertEquals(initialListingSizeAll + 3, listings.getListing().size());
 
         // Filter by condo type
         params.add("type", "condo");
         mvcResult = listingsGetRequest(params, status().isOk());
-        listingMap = getListingListFromResponse(mvcResult);
+        listings = getListingListFromResponse(mvcResult);
         // Initial listing size condos 3 from sql and 2 here
-        assertEquals(initialListingSizeCondos + 2, listingMap.get("listings").size());
+        assertEquals(initialListingSizeCondos + 2, listings.getListing().size());
 
         // Filter by house type
         params.replace("type", List.of("HOUSE"));
         mvcResult = listingsGetRequest(params, status().isOk());
-        listingMap = getListingListFromResponse(mvcResult);
+        listings = getListingListFromResponse(mvcResult);
         // Initial listing size houses from sql and 1 here
-        assertEquals(initialListingSizeHouses + 1, listingMap.get("listings").size());
+        assertEquals(initialListingSizeHouses + 1, listings.getListing().size());
     }
 
     @Test

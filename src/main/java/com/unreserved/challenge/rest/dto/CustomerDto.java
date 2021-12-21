@@ -1,6 +1,7 @@
 package com.unreserved.challenge.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.unreserved.challenge.model.ListingBo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +21,5 @@ public class CustomerDto {
     @NotBlank
     private String email;
     private LocalDateTime createdAt;
-    private List<ListingDto> listingsInterested;
+    private List<ListingBo> listingsInterested;
 }

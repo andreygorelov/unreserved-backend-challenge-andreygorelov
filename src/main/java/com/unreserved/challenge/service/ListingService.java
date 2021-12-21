@@ -7,13 +7,17 @@ import com.unreserved.challenge.model.mapper.ListingEntityMapper;
 import com.unreserved.challenge.repository.ListingRepository;
 import com.unreserved.challenge.repository.specification.SearchField;
 import com.unreserved.challenge.repository.specification.SpecificationsBuilder;
+import com.unreserved.challenge.rest.dto.ListingDto;
+import com.unreserved.challenge.rest.dto.ListingEnvelopDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,10 +43,15 @@ public class ListingService {
         return listingEntityMapper.map(listings);
     }
 
-    public List<ListingBo> getListings(List<SearchField> fields, Pageable pageable) {
+    public ListingEnvelopDto getListings(List<SearchField> fields, Pageable pageable) {
         SpecificationsBuilder<Listing> builder = new SpecificationsBuilder<>(fields);
         Specification<Listing> spec = builder.build();
         Page<Listing> listingPage = listingRepository.findAll(spec, pageable);
-        return listingPage.getContent().stream().map(listingEntityMapper::map).collect(Collectors.toList());
+        Map<String, Object> meta = new HashMap<>();
+        meta.put("currentPage", listingPage.getNumber());
+        meta.put("totalElements", listingPage.getTotalElements());
+        meta.put("totalPages", listingPage.getTotalPages());
+        List<ListingBo> listings = listingPage.getContent().stream().map(listingEntityMapper::map).collect(Collectors.toList());
+        return ListingEnvelopDto.builder().listing(listings).meta(meta).build();
     }
 }

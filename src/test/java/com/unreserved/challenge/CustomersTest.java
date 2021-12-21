@@ -2,6 +2,7 @@ package com.unreserved.challenge;
 
 import com.unreserved.challenge.rest.dto.CustomerDto;
 import com.unreserved.challenge.rest.dto.ListingDto;
+import com.unreserved.challenge.rest.dto.ListingEnvelopDto;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
@@ -37,14 +38,14 @@ public class CustomersTest extends AbstractTest {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("type", "condo");
         mvcResult = listingsGetRequest(params, status().isOk());
-        Map<String, List<ListingDto>> listings = getListingListFromResponse(mvcResult);
+        ListingEnvelopDto listings = getListingListFromResponse(mvcResult);
 
-        customerDto = CustomerDto.builder().email("testuser5@domain.net").listingsInterested(listings.get("listings")).build();
+        customerDto = CustomerDto.builder().email("testuser5@domain.net").listingsInterested(listings.getListing()).build();
         // Verify
         mvcResult = customerPostRequest(customerDto, status().isCreated());
         responseDto = getCustomerDTOFromResponse(mvcResult);
         assertEquals("testuser5@domain.net", responseDto.getEmail());
-        assertEquals(listings.get("listings").size(), responseDto.getListingsInterested().size());
+        assertEquals(listings.getListing().size(), responseDto.getListingsInterested().size());
 
         // There should be 7 customers with 3, 2, and 1 listings
         mvcResult = customersGetRequest(status().isOk());

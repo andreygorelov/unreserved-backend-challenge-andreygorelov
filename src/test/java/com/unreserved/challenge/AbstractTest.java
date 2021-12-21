@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unreserved.challenge.rest.controller.ListingController;
 import com.unreserved.challenge.rest.dto.CustomerDto;
 import com.unreserved.challenge.rest.dto.ListingDto;
+import com.unreserved.challenge.rest.dto.ListingEnvelopDto;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,9 +108,8 @@ public abstract class AbstractTest {
         return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CustomerDto.class);
     }
 
-    protected Map<String, List<ListingDto>> getListingListFromResponse(MvcResult mvcResult) throws UnsupportedEncodingException, JsonProcessingException {
-        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {
-        });
+    protected ListingEnvelopDto getListingListFromResponse(MvcResult mvcResult) throws UnsupportedEncodingException, JsonProcessingException {
+        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ListingEnvelopDto.class);
     }
 
     protected Map<String, List<CustomerDto>> getCustomerListFromResponse(MvcResult mvcResult) throws UnsupportedEncodingException, JsonProcessingException {
